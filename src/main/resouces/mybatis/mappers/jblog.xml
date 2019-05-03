@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="jblog">
+
+	<select id="select" parameterType="String" resultType="com.javaex.vo.BlogVo">
+		<![CDATA[
+		select id, blogTitle, logoFile from blog where id=#{id}			
+		]]>
+	</select>
+
+
+	<insert id="insert" parameterType="com.javaex.vo.UserVo">
+		<![CDATA[
+			insert into blog(id, blogTitle)
+			values (#{id},
+				   (#{userName} || ' 의 블로그 입니다')
+					)
+		]]>
+	</insert>
+
+	<update id="update" parameterType="com.javaex.vo.BlogVo">
+		<![CDATA[
+			update blog 
+		   	set blogTitle=#{blogTitle},
+		   	logoFile=#{logoFile}
+		   	where id=#{id}
+		]]>
+	</update>
+
+	<select id="selectAll" parameterType="String" resultType="com.javaex.vo.CategoryVo"> 
+			<![CDATA[ 
+				select 	CATENO, 
+						ID, 
+						CATENAME, 
+						DESCRIPTION, 
+						REGDATE,
+						POSTCNT
+					
+				from category
+				where ID= #{ID}
+				order by CATENO desc 
+			]]>
+	</select>
+
+
+	<insert id="insertcate" parameterType="com.javaex.vo.CategoryVo">
+
+		<selectKey keyProperty="CATENO" resultType="int" order="BEFORE">
+			select seq_category_no.nextval from dual
+		</selectKey>
+		<![CDATA[
+			insert into category(CATENO,ID,CATENAME, DESCRIPTION)
+			values 
+					(
+					#{CATENO},
+					#{ID},
+					#{CATENAME},
+				    #{DESCRIPTION}) 
+				
+		]]>
+	</insert>
+	
+	<select id="searchcate" parameterType="int" resultType="com.javaex.vo.CategoryVo">
+		<![CDATA[
+		select CATENO, ID, CATENAME, POSTCNT, DESCRIPTION from category where CATENO=#{CATENO}			
+		]]>
+	</select>
+	
+	
+	<delete id="delete" parameterType="com.javaex.vo.CategoryVo">
+	<![CDATA[  
+		DELETE FROM category WHERE nvl(POSTCNT,0) = 0 and CATENO = #{CATENO}
+	
+	]]>
+	</delete>
+	
+	<insert id="insertwrite" parameterType="com.javaex.vo.PostVo">
+		<![CDATA[
+			insert into post 
+			values (
+					seq_post_no.nextval, 
+					#{cateNo}, 
+					#{postTitle}, 
+					#{postContent},
+					sysdate 
+			)
+		]]>
+	</insert>
+
+<!-- 	<select id="selectnpost" resultType="com.javaex.vo.PostVo">
+		<![CDATA[
+			select p.cateNo	
+			from category c
+			join post p
+			on c.cateNo= p.cateNo	
+		]]>
+	</select> -->
+	
+	<select id="selectlist" parameterType="String" resultType="com.javaex.vo.CategoryVo">
+	<![CDATA[
+			select CATENO,
+				   ID,
+				   CATENAME
+				   from category 
+				   where id =#{id}
+			      
+	]]>
+	</select>
+	
+	<update id="updateNo" parameterType="com.javaex.vo.CategoryVo">
+		<![CDATA[
+			update category 
+		   	set POSTCNT =POSTCNT+ 1
+		   	where CATENO=#{CATENO}
+		]]>
+	</update>
+	
+	<select id="selectpost"   parameterType="String" resultType="com.javaex.vo.PostVo">
+	<![CDATA[
+			select POSTTITLE,
+				   POSTCONTENT,
+				   POSTNO,
+				   CATENO				   
+				   from post 
+				   where POSTNO = (select MAX(p.POSTNO) from  
+				   					post p 
+				   					join category c 
+				   					on c.cateNo= p.cateNo 
+				   					where id =#{id} 	
+				   					)
+
+	]]>
+	</select>
+	
+	
+	<select id="selectPostList" parameterType="String" resultType="com.javaex.vo.PostVo"> 
+			<![CDATA[ 
+				select 	p.POSTNO,
+						p.CATENO,
+						p.POSTCONTENT,				
+						p.POSTTITLE, 
+						p.REGDATE					
+				from post p
+				join category c 
+				on c.cateNo= p.cateNo 
+				where c.ID= #{c.ID}
+				order by p.POSTNO desc 
+			]]>
+	</select>
+	
+
+</mapper>
